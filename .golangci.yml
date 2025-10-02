@@ -2,8 +2,6 @@ run:
   timeout: 5m
   tests: true
   build-tags: []
-  skip-dirs:
-    - vendor
 
 linters:
   enable:
@@ -29,6 +27,7 @@ linters:
     - dupl          # Code cloning detection
     - prealloc      # Slice preallocation
     - exportloopref # Detect loop variable references
+    - shadow        # Check for shadowed variables
 
 linters-settings:
   errcheck:
@@ -42,7 +41,6 @@ linters-settings:
       - G104 # Duplicates errcheck
 
   govet:
-    check-shadowing: true
     enable-all: true
 
   gocyclo:
@@ -55,6 +53,8 @@ linters-settings:
     locale: US
 
 issues:
+  exclude-dirs:
+    - vendor
   exclude-rules:
     # Exclude some linters from running on tests files
     - path: _test\.go
@@ -79,6 +79,7 @@ issues:
   new: false
 
 output:
-  format: colored-line-number
+  formats:
+    - format: colored-line-number
   print-issued-lines: true
   print-linter-name: true
