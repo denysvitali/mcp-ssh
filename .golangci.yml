@@ -18,7 +18,6 @@ linters:
     - noctx         # Check context usage
     - rowserrcheck  # Check SQL rows.Err
     - sqlclosecheck # Check SQL Close
-    - typecheck     # Type checking
     - gofmt         # Check formatting
     - goimports     # Check imports
     - misspell      # Check spelling
