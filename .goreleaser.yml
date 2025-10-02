@@ -1,0 +1,80 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: mcp-ssh
+    binary: mcp-ssh
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.Version={{.Version}}
+    main: .
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - example-config.json
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: Features
+      regexp: '^feat:'
+    - title: Bug Fixes
+      regexp: '^fix:'
+    - title: Security
+      regexp: '^sec:'
+    - title: Others
+      order: 999
+
+release:
+  github:
+    owner: denysvitali
+    name: mcp-ssh
+  draft: false
+  prerelease: auto
+  mode: replace
+  header: |
+    ## MCP SSH Server {{.Version}}
+
+    A Model Context Protocol (MCP) server for secure SSH connections.
+  footer: |
+    **Full Changelog**: https://github.com/denysvitali/mcp-ssh/compare/{{.PreviousTag}}...{{.Tag}}
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"

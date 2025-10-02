@@ -1,0 +1,84 @@
+run:
+  timeout: 5m
+  tests: true
+  build-tags: []
+  skip-dirs:
+    - vendor
+
+linters:
+  enable:
+    - errcheck      # Check for unchecked errors
+    - gosimple      # Simplify code
+    - govet         # Go vet
+    - ineffassign   # Detect ineffectual assignments
+    - staticcheck   # Staticcheck
+    - unused        # Check for unused code
+    - gosec         # Security issues
+    - bodyclose     # Check HTTP body is closed
+    - noctx         # Check context usage
+    - rowserrcheck  # Check SQL rows.Err
+    - sqlclosecheck # Check SQL Close
+    - typecheck     # Type checking
+    - gofmt         # Check formatting
+    - goimports     # Check imports
+    - misspell      # Check spelling
+    - unconvert     # Remove unnecessary conversions
+    - unparam       # Detect unused function parameters
+    - goconst       # Detect repeated strings
+    - gocyclo       # Cyclomatic complexity
+    - dupl          # Code cloning detection
+    - prealloc      # Slice preallocation
+    - exportloopref # Detect loop variable references
+
+linters-settings:
+  errcheck:
+    check-blank: true
+    check-type-assertions: true
+
+  gosec:
+    severity: medium
+    confidence: medium
+    excludes:
+      - G104 # Duplicates errcheck
+
+  govet:
+    check-shadowing: true
+    enable-all: true
+
+  gocyclo:
+    min-complexity: 15
+
+  dupl:
+    threshold: 100
+
+  misspell:
+    locale: US
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+
+    # Exclude known issues
+    - text: "weak cryptographic primitive"
+      linters:
+        - gosec
+
+    # Allow long lines in generated code
+    - path: ".*\\.pb\\.go"
+      linters:
+        - lll
+
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  new: false
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
