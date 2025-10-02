@@ -59,7 +59,7 @@ func init() {
 	// Define flags
 	rootCmd.PersistentFlags().StringVar(&allowedHosts, "allowed-hosts", "",
 		"Comma-separated list of allowed hosts (supports glob patterns, e.g., '*.example.com,10.0.*')")
-	rootCmd.MarkPersistentFlagRequired("allowed-hosts")
+	_ = rootCmd.MarkPersistentFlagRequired("allowed-hosts") // Flag name is hardcoded, safe to ignore error
 
 	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "info",
 		"Log level (trace, debug, info, warn, error, fatal, panic)")
@@ -101,6 +101,7 @@ func SetupLogger() (*logrus.Logger, func() error, error) {
 
 	// Set output
 	if logFile != "" {
+		// #nosec G304 - Log file path is provided by user via CLI flag
 		file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to open log file: %w", err)

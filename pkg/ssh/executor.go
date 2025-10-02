@@ -54,27 +54,27 @@ func NewShellExecutor(client *ssh.Client) (*ShellExecutor, error) {
 	// Get stdin pipe
 	stdin, err := session.StdinPipe()
 	if err != nil {
-		session.Close()
+		_ = session.Close() // Best effort cleanup
 		return nil, fmt.Errorf("failed to get stdin pipe: %w", err)
 	}
 
 	// Get stdout pipe
 	stdoutPipe, err := session.StdoutPipe()
 	if err != nil {
-		session.Close()
+		_ = session.Close() // Best effort cleanup
 		return nil, fmt.Errorf("failed to get stdout pipe: %w", err)
 	}
 
 	// Get stderr pipe
 	stderrPipe, err := session.StderrPipe()
 	if err != nil {
-		session.Close()
+		_ = session.Close() // Best effort cleanup
 		return nil, fmt.Errorf("failed to get stderr pipe: %w", err)
 	}
 
 	// Start shell
 	if err := session.Shell(); err != nil {
-		session.Close()
+		_ = session.Close() // Best effort cleanup
 		return nil, fmt.Errorf("failed to start shell: %w", err)
 	}
 
@@ -92,7 +92,7 @@ func NewShellExecutor(client *ssh.Client) (*ShellExecutor, error) {
 	// Disable echo and set empty prompt for clean output
 	initCommands := "stty -echo 2>/dev/null; export PS1=''\n"
 	if _, err := stdin.Write([]byte(initCommands)); err != nil {
-		session.Close()
+		_ = session.Close() // Best effort cleanup
 		return nil, fmt.Errorf("failed to initialize shell: %w", err)
 	}
 
@@ -210,7 +210,7 @@ func (e *ShellExecutor) readUntilDelimiter(reader *bufio.Reader, delimiter strin
 			// Extract exit code from delimiter line (format: __DELIMITER__:123)
 			parts := strings.Split(line, ":")
 			if len(parts) == 2 {
-				fmt.Sscanf(strings.TrimSpace(parts[1]), "%d", &exitCode)
+				_, _ = fmt.Sscanf(strings.TrimSpace(parts[1]), "%d", &exitCode)
 			}
 			return output.String(), exitCode, nil
 		}
@@ -247,10 +247,10 @@ func (e *ShellExecutor) readStderr(reader *bufio.Reader, timeout time.Duration) 
 func (e *ShellExecutor) drainOutput() {
 	// Non-blocking drain
 	for e.stdout.Buffered() > 0 {
-		e.stdout.ReadString('\n')
+		_, _ = e.stdout.ReadString('\n')
 	}
 	for e.stderr.Buffered() > 0 {
-		e.stderr.ReadString('\n')
+		_, _ = e.stderr.ReadString('\n')
 	}
 }
 
@@ -260,7 +260,7 @@ func (e *ShellExecutor) Close() error {
 	defer e.mu.Unlock()
 
 	if e.stdin != nil {
-		e.stdin.Close()
+		_ = e.stdin.Close() // Best effort cleanup
 	}
 
 	if e.session != nil {
